@@ -1,7 +1,6 @@
 import React from "react";
 import { Table } from "./Table";
 import type { Column } from "./types";
-import { TableSearchFilters } from "./TableSearchFilters";
 import "../../index.css";
 
 type DemoRow = {
@@ -35,7 +34,9 @@ const columns: Column<DemoRow>[] = [
       else if (status === "Terminated") badgeClass = "bg-red-50 text-red-700";
       else if (status === "Expired") badgeClass = "bg-orange-50 text-orange-700";
       return (
-        <span className={`inline-block min-w-[70px] text-center rounded-full px-3 py-1 text-xs font-semibold ${badgeClass}`}>
+        <span
+          className={`inline-block min-w-[70px] text-center rounded-full px-3 py-1 text-xs font-semibold ${badgeClass}`}
+        >
           {status}
         </span>
       );
@@ -58,7 +59,12 @@ const columns: Column<DemoRow>[] = [
     width: 200,
     type: "link",
     render: (website) => (
-      <a href={website} target="_blank" rel="noreferrer" className="text-blue-600 underline">
+      <a
+        href={website}
+        target="_blank"
+        rel="noreferrer"
+        className="text-blue-600 underline"
+      >
         {website.replace(/^https?:\/\//, "")}
       </a>
     ),
@@ -72,13 +78,19 @@ const columns: Column<DemoRow>[] = [
     width: 180,
     type: "link",
     render: (profileUrl) => (
-      <a href={profileUrl} target="_blank" rel="noreferrer" className="text-blue-600 underline">
+      <a
+        href={profileUrl}
+        target="_blank"
+        rel="noreferrer"
+        className="text-blue-600 underline"
+      >
         View Profile
       </a>
     ),
   },
 ];
 
+// Helpers
 const randomFrom = (arr: any[]) => arr[Math.floor(Math.random() * arr.length)];
 const randomDate = (start: Date, end: Date) => {
   const d = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
@@ -119,52 +131,30 @@ export default {
   component: Table,
 };
 
+// ✅ Stories (simplified since Table now handles filters/pagination/search internally)
 export const Basic = () => (
   <div className="w-full max-w-[800px] h-[600px] overflow-auto">
-    <Table<DemoRow>
-      columns={columns}
-      data={makeRows(10)}
-      total={10}
-    />
+    <Table<DemoRow> columns={columns} data={makeRows(10)} />
   </div>
 );
 
 export const WithSorting = () => (
   <div className="w-full max-w-[800px] h-[600px] overflow-auto">
-    <Table<DemoRow>
-      columns={columns}
-      data={makeRows(10)}
-      total={10}
-      sortable
-    />
+    <Table<DemoRow> columns={columns} data={makeRows(10)} sortable />
   </div>
 );
 
 export const WithSearch = () => (
   <div className="w-full max-w-[800px] h-[600px] overflow-auto">
-    <Table<DemoRow>
-      columns={columns}
-      data={makeRows(10)}
-      total={10}
-      searchable
-    />
+    <Table<DemoRow> columns={columns} data={makeRows(10)} searchable />
   </div>
 );
 
-export const WithFilters = () => {
-  const [filters, setFilters] = React.useState<Record<string, any>>({});
-  return (
-    <div className="w-full max-w-[800px] h-[600px] overflow-auto">
-      <Table<DemoRow>
-        columns={columns}
-        data={makeRows(10)}
-        total={10}
-        filters={filters}
-        onFilterChange={(key, value) => setFilters((prev) => ({ ...prev, [key]: value }))}
-      />
-    </div>
-  );
-};
+export const WithFilters = () => (
+  <div className="w-full max-w-[800px] h-[600px] overflow-auto">
+    <Table<DemoRow> columns={columns} data={makeRows(10)} />
+  </div>
+);
 
 export const WithInlineEdit = () => {
   const [rows, setRows] = React.useState(makeRows(10));
@@ -173,7 +163,6 @@ export const WithInlineEdit = () => {
       <Table<DemoRow>
         columns={columns}
         data={rows}
-        total={10}
         onCellEdit={(rowIdx, key, value) => {
           setRows((prevRows) =>
             prevRows.map((row, idx) =>
@@ -186,43 +175,21 @@ export const WithInlineEdit = () => {
   );
 };
 
-export const WithPagination = () => {
-  const [page, setPage] = React.useState(1);
-  const [pageSize, setPageSize] = React.useState(5);
-  const [rows] = React.useState(makeRows(20));
-  return (
-    <div className="w-full max-w-[800px] h-[600px] overflow-auto">
-      <Table<DemoRow>
-        columns={columns}
-        data={rows.slice((page - 1) * pageSize, page * pageSize)}
-        total={rows.length}
-        page={page}
-        pageSize={pageSize}
-        onPageChange={setPage}
-        onPageSizeChange={setPageSize}
-      />
-    </div>
-  );
-};
+export const WithPagination = () => (
+  <div className="w-full max-w-[800px] h-[600px] overflow-auto">
+    <Table<DemoRow> columns={columns} data={makeRows(30)} />
+  </div>
+);
 
 export const WithLoadingState = () => (
   <div className="w-full max-w-[800px] h-[600px] overflow-auto">
-    <Table<DemoRow>
-      columns={columns}
-      data={[]}
-      loading
-      total={0}
-    />
+    <Table<DemoRow> columns={columns} data={[]} loading />
   </div>
 );
 
 export const WithCustomRenderers = () => (
   <div className="w-full max-w-[800px] h-[600px] overflow-auto">
-    <Table<DemoRow>
-      columns={columns}
-      data={makeRows(10)}
-      total={10}
-    />
+    <Table<DemoRow> columns={columns} data={makeRows(10)} />
   </div>
 );
 
@@ -231,7 +198,6 @@ export const NoData = () => (
     <Table<DemoRow>
       columns={columns}
       data={[]}
-      total={0}
       emptyMessage="No data available for this table."
     />
   </div>
@@ -239,74 +205,28 @@ export const NoData = () => (
 
 export const WithResizableColumns = () => (
   <div className="w-full max-w-[800px] h-[600px] overflow-auto">
-    <Table<DemoRow>
-      columns={columns}
-      data={makeRows(10)}
-      total={10}
-      resizable
-    />
+    <Table<DemoRow> columns={columns} data={makeRows(10)} resizable />
   </div>
 );
 
 export const FullFeatureDemo = () => {
   const [rows, setRows] = React.useState(makeRows(50));
-  const [filters, setFilters] = React.useState<Record<string, any>>({});
-  const [search, setSearch] = React.useState("");
-  const [page, setPage] = React.useState(1);
-  const [pageSize, setPageSize] = React.useState(10);
   const [loading, setLoading] = React.useState(false);
 
   React.useEffect(() => {
     setLoading(true);
     const timeout = setTimeout(() => setLoading(false), 400);
     return () => clearTimeout(timeout);
-  }, [page, pageSize]);
-
-  let filteredRows = rows;
-  if (search) {
-    filteredRows = filteredRows.filter((row) =>
-      columns.some((col) =>
-        String(row[col.key] ?? "").toLowerCase().includes(search.toLowerCase())
-      )
-    );
-  }
-  Object.entries(filters).forEach(([key, value]) => {
-    if (value !== undefined && value !== null && value !== "") {
-      filteredRows = filteredRows.filter((row) =>
-        String(row[key as keyof DemoRow] ?? "").toLowerCase().includes(String(value).toLowerCase())
-      );
-    }
-  });
+  }, []);
 
   return (
     <div className="p-8 w-full max-w-[800px] h-[700px] overflow-auto">
       <h2 className="text-xl font-semibold mb-4">Full Feature Table Demo</h2>
-      <TableSearchFilters
-        searchable
-        search={search}
-        onSearchChange={setSearch}
-        filters={filters}
-        onFilterChange={(key, value) => setFilters((prev) => ({ ...prev, [key]: value }))}
-        columns={columns}
-      />
       <div className="w-full h-[600px]">
         <Table<DemoRow>
           columns={columns}
-          data={filteredRows.slice((page - 1) * pageSize, page * pageSize)}
-          total={filteredRows.length}
+          data={rows}
           loading={loading}
-          page={page}
-          pageSize={pageSize}
-          onPageChange={(p) => {
-            setLoading(true);
-            setPage(p);
-          }}
-          onPageSizeChange={(s) => {
-            setLoading(true);
-            setPageSize(s);
-          }}
-          filters={filters}
-          onFilterChange={(key, value) => setFilters((prev) => ({ ...prev, [key]: value }))}
           searchable
           sortable
           resizable

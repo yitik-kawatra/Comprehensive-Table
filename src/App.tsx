@@ -142,10 +142,7 @@ const makeRows = (n = 200): Row[] =>
   });
 
 function App() {
-  const [rows, setRows] = React.useState<Row[]>([]);
-  const [filters, setFilters] = React.useState<Record<string, any>>({});
-  const [page, setPage] = React.useState(1);
-  const [pageSize, setPageSize] = React.useState(10);
+   const [rows, setRows] = React.useState<Row[]>([]);
   const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
@@ -155,7 +152,7 @@ function App() {
       setLoading(false);
     }, 600);
     return () => clearTimeout(timeout);
-  }, [page, pageSize]);
+  }, []);
 
   return (
     <div className="p-8">
@@ -168,21 +165,6 @@ function App() {
         stickyHeader
         searchable
         sortable
-        filters={filters}
-        onFilterChange={(key, value) =>
-          setFilters((prev) => ({ ...prev, [key]: value }))
-        }
-        page={page}
-        pageSize={pageSize}
-        total={rows.length}
-        onPageChange={(p) => {
-          setLoading(true);
-          setPage(p);
-        }}
-        onPageSizeChange={(s) => {
-          setLoading(true);
-          setPageSize(s);
-        }}
         onCellEdit={(rowIdx, key, value) => {
           setRows((rows) =>
             rows.map((row, index) =>

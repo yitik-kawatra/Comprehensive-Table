@@ -14,9 +14,6 @@ export function Table<T>({
   sortable,
   onSort,
   searchable,
-  filters,
-  onFilterChange,
-  total = 0,
   resizable,
   stickyHeader,
   onCellEdit,
@@ -38,13 +35,13 @@ export function Table<T>({
     setEditingCell(null);
   };
 
-  const [sortConfig, setSortConfig] = useState<{ key: keyof T; direction: "asc" | "desc" } | null>(null);
+  const [filters, setFilters] = useState<Record<string, any>>({});
   const [search, setSearch] = useState("");
-  const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
-  const [tableData, setTableData] = useState<T[]>(data);
-
   const [currentPage, setCurrentPage] = useState(1);
   const [currentPageSize, setCurrentPageSize] = useState(10);
+  const [sortConfig, setSortConfig] = useState<{ key: keyof T; direction: "asc" | "desc" } | null>(null);
+  const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
+  const [tableData, setTableData] = useState<T[]>(data);
 
   const [colWidths, setColWidths] = useState<{ [k: string]: number }>(() =>
     Object.fromEntries(columns.map((c) => [String(c.key), c.width ?? 120]))
@@ -70,7 +67,7 @@ export function Table<T>({
     onSort?.(key, direction);
   };
 
-  let filteredData = tableData;
+ let filteredData = data;
   if (searchable && search) {
     filteredData = filteredData.filter((row) =>
       columns.some((col) =>
@@ -78,15 +75,14 @@ export function Table<T>({
       )
     );
   }
-  if (filters) {
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== "") {
-        filteredData = filteredData.filter((row) =>
-          String(row[key as keyof T] ?? "").toLowerCase().includes(String(value).toLowerCase())
-        );
-      }
-    });
-  }
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value) {
+      filteredData = filteredData.filter((row) =>
+        String(row[key as keyof T] ?? "").toLowerCase().includes(String(value).toLowerCase())
+      );
+    }
+  });
+
 
   if (sortConfig) {
     const { key, direction } = sortConfig;
@@ -105,6 +101,7 @@ export function Table<T>({
     });
   }
 
+  const totalPages = Math.ceil(filteredData.length / currentPageSize);
   const paginatedData = filteredData.slice(
     (currentPage - 1) * currentPageSize,
     currentPage * currentPageSize
@@ -184,16 +181,18 @@ export function Table<T>({
           </div>
         </div>
 
-        {(searchable || (filters && Object.keys(filters).length > 0)) && (
-          <TableSearchFilters
-            searchable={searchable}
-            search={search}
-            onSearchChange={setSearch}
-            filters={filters}
-            onFilterChange={onFilterChange as ((key: string, value: any) => void) | undefined}
-            columns={columns}
-          />
-        )}
+      {(searchable || columns.some(c => c.filterable)) && (
+        <TableSearchFilters
+          searchable={searchable}
+          search={search}
+          onSearchChange={setSearch}
+          filters={filters}
+          onFilterChange={(key, value) =>
+            setFilters((prev) => ({ ...prev, [key]: value }))
+          }
+          columns={columns}
+        />
+      )}
 
         <div className="flex-1 overflow-auto relative min-h-0">
           <table
@@ -399,17 +398,17 @@ export function Table<T>({
           </table>
         </div>
         {filteredData.length > 0 && (
-          <div className="pt-2">
-            <Pagination
-              total={total}
-              onChange={(newPage, newPageSize) => {
-                setCurrentPage(newPage);
-                setCurrentPageSize(newPageSize);
-              }}
-            />
-          </div>
-        )}
-      </div>
+        <Pagination
+          total={filteredData.length}
+          defaultPage={currentPage}
+          defaultPageSize={currentPageSize}
+          onChange={(newPage, newPageSize) => {
+            setCurrentPage(newPage);
+            setCurrentPageSize(newPageSize);
+          }}
+        />
+      )}
+    </div>
     </>
   );
 }
